@@ -18,6 +18,7 @@ import (
 	"encoding/binary"
 	"math"
 	"time"
+	
 
 	"github.com/pingcap/errors"
 	"github.com/pingcap/tidb/kv"
@@ -72,7 +73,35 @@ func EncodeRowKeyWithHandle(tableID int64, handle int64) kv.Key {
 // DecodeRecordKey decodes the key and gets the tableID, handle.
 func DecodeRecordKey(key kv.Key) (tableID int64, handle int64, err error) {
 	/* Your code here */
-	return
+	
+	if key == nil {
+		return -1, -1, errors.New("Key should not be null.")
+	}
+
+	if len(key) != RecordRowKeyLen {
+		return -1, -1, errors.New("Length of key is incorrect.")
+	}
+
+	if string(key[:1]) != "t" {
+	    return -1, -1, errors.New("Invaild table prefix.")
+	}
+	
+	_, tableID, err = codec.DecodeInt(key[tablePrefixLength:])
+	
+	if err != nil {
+		return -1, -1, errors.New("Invalid tableID")
+	}
+
+	if string(key[TableSplitKeyLen:TableSplitKeyLen + recordPrefixSepLength]) != "_r" {
+		return -1, -1, errors.New("Invaild row prefix")
+	}
+	
+	_, handle, err = codec.DecodeInt(key[prefixLen:])
+	
+	if err != nil {
+		return -1, -1, errors.New("Invaild handle")
+	}
+	return tableID, handle, nil
 }
 
 // appendTableIndexPrefix appends table index prefix  "t[tableID]_i".
@@ -95,6 +124,36 @@ func EncodeIndexSeekKey(tableID int64, idxID int64, encodedValue []byte) kv.Key 
 // DecodeIndexKeyPrefix decodes the key and gets the tableID, indexID, indexValues.
 func DecodeIndexKeyPrefix(key kv.Key) (tableID int64, indexID int64, indexValues []byte, err error) {
 	/* Your code here */
+	if key == nil {
+		return -1, -1, nil, errors.New("Key should not be null.")
+	}
+
+	if len(key) < RecordRowKeyLen {
+		return -1, -1, nil, errors.New("Length of key is incorrect.")
+	}
+
+	if string(key[:1]) != "t" {
+	    return -1, -1, nil, errors.New("Invaild table prefix.")
+	}
+	
+	_, tableID, err = codec.DecodeInt(key[tablePrefixLength:])
+	
+	if err != nil {
+		return -1, -1, nil, errors.New("Invalid tableID")
+	}
+
+	if string(key[TableSplitKeyLen:TableSplitKeyLen + recordPrefixSepLength]) != "_i" {
+		return -1, -1,nil, errors.New("Invaild row prefix")
+	}
+
+	_, indexID, err = codec.DecodeInt(key[prefixLen: prefixLen + idLen])
+	
+	if err != nil {
+		return -1, -1, nil, errors.New("Invaild indexID")
+	}
+
+	indexValues = key[RecordRowKeyLen:]
+
 	return tableID, indexID, indexValues, nil
 }
 
