@@ -34,6 +34,13 @@ require (
 	golang.org/x/tools v0.0.0-20200304193943-95d2e580d8eb
 	google.golang.org/grpc v1.25.1
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
+	modernc.org/golex v1.0.0 // indirect
+	modernc.org/goyacc v1.0.0 // indirect
+	modernc.org/mathutil v1.1.1 // indirect
+	modernc.org/parser v1.0.0 // indirect
+	modernc.org/sortutil v1.1.0 // indirect
+	modernc.org/strutil v1.1.0 // indirect
+	modernc.org/y v1.0.0 // indirect
 )
 
 go 1.13
