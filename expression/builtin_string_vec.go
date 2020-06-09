@@ -98,6 +98,7 @@ func (b *builtinLengthSig) vecEvalInt(input *chunk.Chunk, result *chunk.Column) 
 	}
 
 	result.ResizeInt64(n, false)
+	result.MergeNulls(buf)
 	i64s := result.Int64s()
 	for i := 0; i < n; i++ {
 		if result.IsNull(i) {
